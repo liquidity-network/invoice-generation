@@ -66,7 +66,7 @@ const createInvoice = (receiver, amount, details = '', currency = 'ETH') => {
                 walletAddresses: [receiver.publicKey]
             }
         ],
-        amount: new BigNumber(amount).toFixed(0),
+        amount: new BigNumber(amount),
         currency: currency,
         details: web3Utils.soliditySha3(details)
     }

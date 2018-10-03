@@ -1,7 +1,7 @@
 {
-  "name": "invoice-generation",
+  "name": "liquidity-invoice-generation",
   "version": "1.0.0",
-  "description": "",
+  "description": "Invoice generation system compatible with Liquidity Network",
   "main": "index.js",
   "dependencies": {
     "atob": "^2.1.1",
@@ -10,9 +10,6 @@
     "json-bigint": "^0.3.0",
     "uuid": "^3.3.2",
     "web3-utils": "^1.0.0-beta.34"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",

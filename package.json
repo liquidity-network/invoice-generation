@@ -1,13 +1,11 @@
 {
   "name": "liquidity-invoice-generation",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Invoice generation system compatible with Liquidity Network",
   "main": "index.js",
   "dependencies": {
-    "atob": "^2.1.1",
     "bignumber.js": "^7.2.1",
-    "btoa": "^1.2.1",
-    "json-bigint": "^0.3.0",
+    "lz-string": "^1.4.4",
     "uuid": "^3.3.2",
     "web3-utils": "^1.0.0-beta.34"
   },
@@ -16,7 +14,6 @@
     "url": "git+https://github.com/liquidity-network/invoice-generation.git"
   },
   "author": "Thibault Meunier",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/liquidity-network/invoice-generation/issues"
   },

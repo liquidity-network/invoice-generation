@@ -1,7 +1,5 @@
 const BigNumber = require('bignumber.js')
-const JSONbig = require('json-bigint')
-const atob = require('atob')
-const btoa = require('btoa')
+const lzstring = require('lz-string')
 const uuid = require('uuid/v4')
 const web3Utils = require('web3-utils')
 
@@ -57,13 +55,14 @@ const deriveReferenceNonce = (invoice) => {
  * @returns {{invoice: {uuid: string, destinations: {networkId: number, contractAddress: string, walletAddresses: string[]}[], amount, currency: string, details: string}, nonce: string}}
  */
 const createInvoice = (receiver, amount, details = '', currency = 'ETH') => {
+    console.log(web3Utils.toChecksumAddress(receiver.publicKey))
     const invoice =  {
         uuid: uuid().split('-').join(''),
         destinations: [
             {
                 networkId: receiver.networkId,
                 contractAddress: receiver.hubAddress,
-                walletAddresses: [receiver.publicKey]
+                walletAddresses: [web3Utils.toChecksumAddress(receiver.publicKey)]
             }
         ],
         amount: new BigNumber(amount),
@@ -83,7 +82,18 @@ const createInvoice = (receiver, amount, details = '', currency = 'ETH') => {
  * @returns {string} - Encoded Invoice
  */
 const encodeInvoice = (invoice) => {
-    return encodeURIComponent(btoa(JSONbig.stringify(invoice)))
+    const data = [
+        invoice.uuid,
+        invoice.destinations.map(dest => [
+            dest.networkId,
+            dest.contractAddress,
+            dest.walletAddresses.map(web3Utils.hexToNumberString).join('#')
+        ].join('@')).join('&'),
+        invoice.amount.toString(),
+        invoice.currency,
+        invoice.details,
+    ].join('|')
+    return lzstring.compressToEncodedURIComponent(data)
 }
 
 /**
@@ -92,7 +102,21 @@ const encodeInvoice = (invoice) => {
  * @returns {Object} - Invoice
  */
 const decodeInvoice = (encoded) => {
-    return JSONbig.parse(atob(decodeURIComponent(encoded)))
+    const data = lzstring.decompressFromEncodedURIComponent(encoded).split('|')
+    return {
+        uuid: data[0],
+        destinations: data[1].split('&').map(dest => {
+            const destData = dest.split('@')
+            return {
+                networkId: destData[0],
+                contractAddress: destData[1],
+                walletAddresses: destData[2].split('#').map(web3Utils.fromUtf8),
+            }
+        }),
+        amount: new BigNumber(data[2]),
+        currency: data[3],
+        details: data[4],
+    }
 }
 
 module.exports = {

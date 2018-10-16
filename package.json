@@ -1,11 +1,10 @@
 {
   "name": "liquidity-invoice-generation",
-  "version": "1.0.1",
+  "version": "1.1.1",
   "description": "Invoice generation system compatible with Liquidity Network",
   "main": "index.js",
   "dependencies": {
     "bignumber.js": "^7.2.1",
-    "lz-string": "^1.4.4",
     "uuid": "^3.3.2",
     "web3-utils": "^1.0.0-beta.34"
   },

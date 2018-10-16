@@ -1,5 +1,4 @@
 const BigNumber = require('bignumber.js')
-const lzstring = require('lz-string')
 const uuid = require('uuid/v4')
 const web3Utils = require('web3-utils')
 
@@ -55,7 +54,6 @@ const deriveReferenceNonce = (invoice) => {
  * @returns {{invoice: {uuid: string, destinations: {networkId: number, contractAddress: string, walletAddresses: string[]}[], amount, currency: string, details: string}, nonce: string}}
  */
 const createInvoice = (receiver, amount, details = '', currency = 'ETH') => {
-    console.log(web3Utils.toChecksumAddress(receiver.publicKey))
     const invoice =  {
         uuid: uuid().split('-').join(''),
         destinations: [
@@ -70,10 +68,7 @@ const createInvoice = (receiver, amount, details = '', currency = 'ETH') => {
         details: web3Utils.soliditySha3(details)
     }
 
-    return {
-        invoice: invoice,
-        nonce: deriveReferenceNonce(invoice)
-    }
+    return Object.defineProperty(invoice, 'nonce', { value: deriveReferenceNonce(invoice), enumerable: true })
 }
 
 /**
@@ -87,13 +82,13 @@ const encodeInvoice = (invoice) => {
         invoice.destinations.map(dest => [
             dest.networkId,
             dest.contractAddress,
-            dest.walletAddresses.map(web3Utils.hexToNumberString).join('#')
+            dest.walletAddresses.join('#')
         ].join('@')).join('&'),
         invoice.amount.toString(),
         invoice.currency,
         invoice.details,
     ].join('|')
-    return lzstring.compressToEncodedURIComponent(data)
+    return data
 }
 
 /**
@@ -102,7 +97,7 @@ const encodeInvoice = (invoice) => {
  * @returns {Object} - Invoice
  */
 const decodeInvoice = (encoded) => {
-    const data = lzstring.decompressFromEncodedURIComponent(encoded).split('|')
+    const data = encoded.split('|')
     return {
         uuid: data[0],
         destinations: data[1].split('&').map(dest => {
@@ -110,7 +105,7 @@ const decodeInvoice = (encoded) => {
             return {
                 networkId: destData[0],
                 contractAddress: destData[1],
-                walletAddresses: destData[2].split('#').map(web3Utils.fromUtf8),
+                walletAddresses: destData[2].split('#'),
             }
         }),
         amount: new BigNumber(data[2]),

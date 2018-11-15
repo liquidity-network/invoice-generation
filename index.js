@@ -59,7 +59,7 @@ const createInvoice = (receiver, amount, details = '', currency = 'ETH') => {
         destinations: [
             {
                 networkId: receiver.networkId,
-                contractAddress: receiver.hubAddress,
+                contractAddress: web3Utils.toChecksumAddress(receiver.hubAddress),
                 walletAddresses: [web3Utils.toChecksumAddress(receiver.publicKey)]
             }
         ],
@@ -77,6 +77,7 @@ const createInvoice = (receiver, amount, details = '', currency = 'ETH') => {
  * @returns {string} - Encoded Invoice
  */
 const encodeInvoice = (invoice) => {
+    // `ethereum:pay-${invoice.dest.walletAddresses[0]}@${invoice.dest.networkId}/transfer?value=${invoice.amount.toString()}&string`
     const data = [
         invoice.uuid,
         invoice.destinations.map(dest => [
@@ -98,20 +99,22 @@ const encodeInvoice = (invoice) => {
  */
 const decodeInvoice = (encoded) => {
     const data = encoded.split('|')
-    return {
+    const invoice = {
         uuid: data[0],
         destinations: data[1].split('&').map(dest => {
             const destData = dest.split('@')
             return {
-                networkId: destData[0],
-                contractAddress: destData[1],
-                walletAddresses: destData[2].split('#'),
+                networkId: Number.parseInt(destData[0]),
+                contractAddress: web3Utils.toChecksumAddress(destData[1]),
+                walletAddresses: destData[2].split('#').map(web3Utils.toChecksumAddress),
             }
         }),
         amount: new BigNumber(data[2]),
         currency: data[3],
         details: data[4],
     }
+
+    return Object.defineProperty(invoice, 'nonce', { value: deriveReferenceNonce(invoice), enumerable: true })
 }
 
 module.exports = {

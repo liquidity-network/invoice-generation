@@ -35,7 +35,7 @@ const deriveReferenceNonce = (invoice) => {
         {type: 'bytes16', value: invoice.uuid},
         {type: 'bytes32', value: destinationsChecksum},
         {type: 'uint256', value: invoice.amount.toFixed(0)},
-        {type: 'bytes32', value: invoice.currency},
+        {type: 'bytes32', value: invoice.tokenAddress},
         {type: 'bytes32', value: invoice.details},
     )
 
@@ -48,14 +48,14 @@ const deriveReferenceNonce = (invoice) => {
 /**
  * Create a proper invoice and its nonce
  * @param receiver {{networkId: number, contractAddress: string, publicKey: string}} - Details of the receiver
- * @param amount {number} - Amount to be paid in the smallest division supported by the currency
+ * @param amount {number} - Amount to be paid in the smallest division supported by the tokenAddress
  * @param details {string} - Details to be hashed
- * @param currency {string} - Currency to be used for the payment
- * @returns {{invoice: {uuid: string, destinations: {networkId: number, contractAddress: string, walletAddresses: string[]}[], amount, currency: string, details: string}, nonce: string}}
+ * @param tokenAddress {string} - tokenAddress to be used for the payment
+ * @returns {{invoice: {uuid: string, destinations: {networkId: number, contractAddress: string, walletAddresses: string[]}[], amount, tokenAddress: string, details: string}, nonce: string}}
  */
-const createInvoice = (receiver, amount, details = '', currency) => {
-    if (typeof currency === 'undefined') {
-        currency = receiver.hubAddress
+const createInvoice = (receiver, amount, details = '', tokenAddress) => {
+    if (typeof tokenAddress === 'undefined') {
+        tokenAddress = receiver.hubAddress
     }
     const invoice =  {
         uuid: uuid().split('-').join(''),
@@ -67,7 +67,7 @@ const createInvoice = (receiver, amount, details = '', currency) => {
             }
         ],
         amount: new BigNumber(amount),
-        currency: currency,
+        tokenAddress: tokenAddress,
         details: web3Utils.soliditySha3(details)
     }
 
@@ -89,7 +89,7 @@ const encodeInvoice = (invoice) => {
             dest.walletAddresses.join('#')
         ].join('@')).join('&'),
         invoice.amount.toString(),
-        invoice.currency,
+        invoice.tokenAddress,
         invoice.details,
     ].join('|')
     return data
@@ -113,7 +113,7 @@ const decodeInvoice = (encoded) => {
             }
         }),
         amount: new BigNumber(data[2]),
-        currency: data[3],
+        tokenAddress: data[3],
         details: data[4],
     }
 

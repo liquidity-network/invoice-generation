@@ -35,7 +35,7 @@ const deriveReferenceNonce = (invoice) => {
         {type: 'bytes16', value: invoice.uuid},
         {type: 'bytes32', value: destinationsChecksum},
         {type: 'uint256', value: invoice.amount.toFixed(0)},
-        {type: 'bytes4', value: invoice.currency},
+        {type: 'bytes32', value: invoice.currency},
         {type: 'bytes32', value: invoice.details},
     )
 
@@ -53,7 +53,10 @@ const deriveReferenceNonce = (invoice) => {
  * @param currency {string} - Currency to be used for the payment
  * @returns {{invoice: {uuid: string, destinations: {networkId: number, contractAddress: string, walletAddresses: string[]}[], amount, currency: string, details: string}, nonce: string}}
  */
-const createInvoice = (receiver, amount, details = '', currency = 'ETH') => {
+const createInvoice = (receiver, amount, details = '', currency) => {
+    if (typeof currency === 'undefined') {
+        currency = receiver.hubAddress
+    }
     const invoice =  {
         uuid: uuid().split('-').join(''),
         destinations: [

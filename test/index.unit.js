@@ -1,5 +1,6 @@
 const assert = require('assert')
 const web3Utils = require('web3-utils')
+const BigNumber = require('bignumber.js')
 
 const generation = require('../dist/index')
 
@@ -21,8 +22,7 @@ describe('Invoice generation unit test', function () {
         assert.deepEqual(result.destinations[0].walletAddresses.length, 1)
         assert.deepEqual(result.destinations[0].walletAddresses.length, 1)
 
-      console.log(web3Utils)
-        assert(result.amount.constructor.name === 'BigNumber')
+        assert(BigNumber.isBigNumber(result.amount))
         assert(result.amount.isEqualTo(1))
         assert(web3Utils.isHex(result.details))
     })

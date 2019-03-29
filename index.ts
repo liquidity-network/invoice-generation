@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
 import uuid from 'uuid/v4'
-import * as web3Utils from 'web3-utils'
+import { soliditySha3, toChecksumAddress } from 'web3-utils'
 
 export interface Destination {
   networkId: number
@@ -21,21 +21,21 @@ const destinationChecksum = (invoiceDestination: Destination) => {
   const walletAddressesChecksums = invoiceDestination.walletAddresses.map(walletAddress => {
     return {
       type: 'bytes32',
-      value: web3Utils.soliditySha3({
+      value: soliditySha3({
         type: 'address',
         value: walletAddress,
       }),
     }
   })
 
-  return web3Utils.soliditySha3(
+  return soliditySha3(
     {
       type: 'uint256',
       value: invoiceDestination.networkId.toString(),
     },
     {
       type: 'bytes32',
-      value: web3Utils.soliditySha3({
+      value: soliditySha3({
         type: 'address',
         value: invoiceDestination.contractAddress,
       }),
@@ -55,9 +55,9 @@ export const deriveReferenceNonce = (invoice: Invoice): number => {
       return { type: 'bytes32', value: checksum }
     })
 
-  const destinationsChecksum = web3Utils.soliditySha3(...destinationsChecksumTargets)
+  const destinationsChecksum = soliditySha3(...destinationsChecksumTargets)
 
-  const invoiceChecksum = web3Utils.soliditySha3(
+  const invoiceChecksum = soliditySha3(
     { type: 'bytes16', value: invoice.uuid },
     { type: 'bytes32', value: destinationsChecksum },
     { type: 'uint256', value: invoice.amount.toFixed(0) },
@@ -88,26 +88,25 @@ export const createInvoice = (
   if (typeof tokenAddress === 'undefined') {
     tokenAddress = receiver.hubAddress
   }
-  const invoice = {
+  const invoice: Invoice = {
     uuid: uuid()
       .split('-')
       .join(''),
     destinations: [
       {
         networkId: receiver.networkId,
-        contractAddress: web3Utils.toChecksumAddress(receiver.hubAddress),
-        walletAddresses: [web3Utils.toChecksumAddress(receiver.publicKey)],
+        contractAddress: toChecksumAddress(receiver.hubAddress),
+        walletAddresses: [toChecksumAddress(receiver.publicKey)],
       },
     ],
     amount: new BigNumber(amount),
     tokenAddress: tokenAddress,
-    details: web3Utils.soliditySha3(details),
+    details: soliditySha3(details),
   }
 
-  return Object.defineProperty(invoice, 'nonce', {
-    value: deriveReferenceNonce(invoice),
-    enumerable: true,
-  })
+  invoice.nonce = deriveReferenceNonce(invoice)
+
+  return invoice
 }
 
 /**
@@ -137,14 +136,14 @@ export const encodeInvoice = (invoice: Invoice): string => {
  */
 export const decodeInvoice = (encoded: string): Invoice => {
   const data = encoded.split('|')
-  const invoice = {
+  const invoice: Invoice = {
     uuid: data[0],
     destinations: data[1].split('&').map(dest => {
       const destData = dest.split('@')
       return {
         networkId: Number.parseInt(destData[0]),
-        contractAddress: web3Utils.toChecksumAddress(destData[1]),
-        walletAddresses: destData[2].split('#').map(web3Utils.toChecksumAddress),
+        contractAddress: toChecksumAddress(destData[1]),
+        walletAddresses: destData[2].split('#').map(toChecksumAddress),
       }
     }),
     amount: new BigNumber(data[2]),
@@ -152,8 +151,7 @@ export const decodeInvoice = (encoded: string): Invoice => {
     details: data[4],
   }
 
-  return Object.defineProperty(invoice, 'nonce', {
-    value: deriveReferenceNonce(invoice),
-    enumerable: true,
-  })
+  invoice.nonce = deriveReferenceNonce(invoice)
+
+  return invoice
 }

@@ -8,9 +8,9 @@
     "web3-utils": "1.0.0-beta.55"
   },
   "devDependencies": {
-    "@team-griffin/install-self-peers": "^1.1.1",
     "@typescript-eslint/eslint-plugin": "1.10.2",
     "@typescript-eslint/parser": "1.10.2",
+    "bignumber.js": "8.1.1",
     "coveralls": "3.0.4",
     "eslint": "5.16.0",
     "eslint-config-prettier": "4.3.0",
@@ -28,16 +28,12 @@
     "typedoc": "0.14.2",
     "typescript": "3.5.1"
   },
-  "peerDependencies": {
-    "bignumber.js": ">7"
-  },
   "scripts": {
     "build": "tsc",
     "coverage": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly",
     "documentation": "typedoc --out docs index.ts",
     "lint": "eslint '*.{ts,js}' --fix",
-    "test": "npm run build && mocha",
-    "prepare": "install-self-peers -- --ignore-scripts"
+    "test": "npm run build && mocha"
   },
   "repository": {
     "type": "git",

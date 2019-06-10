@@ -1,6 +1,6 @@
+import { soliditySha3, toChecksumAddress } from 'web3-utils'
 import BigNumber from 'bignumber.js'
 import uuid from 'uuid/v4'
-import { soliditySha3, toChecksumAddress } from 'web3-utils'
 
 export interface Destination {
   networkId: number
@@ -46,14 +46,13 @@ const destinationChecksum = (invoiceDestination: Destination) => {
 
 /**
  * From an invoice computes its nonce without nonce attribute
+ *
  * @param invoice
  */
 export const deriveReferenceNonce = (invoice: Invoice): number => {
   const destinationsChecksumTargets = invoice.destinations
     .map(destinationChecksum)
-    .map(checksum => {
-      return { type: 'bytes32', value: checksum }
-    })
+    .map(checksum => ({ type: 'bytes32', value: checksum }))
 
   const destinationsChecksum = soliditySha3(...destinationsChecksumTargets)
 
@@ -143,7 +142,7 @@ export const decodeInvoice = (encoded: string): Invoice => {
       return {
         networkId: Number.parseInt(destData[0]),
         contractAddress: toChecksumAddress(destData[1]),
-        walletAddresses: destData[2].split('#').map(toChecksumAddress),
+        walletAddresses: destData[2].split('#').map(a => toChecksumAddress(a)),
       }
     }),
     amount: new BigNumber(data[2]),

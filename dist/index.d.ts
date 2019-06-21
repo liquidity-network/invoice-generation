@@ -16,7 +16,6 @@ export declare const createInvoice: (params: {
   operatorAddress?: string
   tokenAddress?: string
   amount?: string | number | BigNumber
-  deriveNonce?: boolean
 }) => Invoice
 export declare const encodeInvoice: (invoice: Invoice) => string
 export declare const decodeInvoice: (encoded: string) => Invoice

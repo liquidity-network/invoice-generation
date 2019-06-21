@@ -16,22 +16,24 @@ exports.createInvoice = function (params) {
     if (!params.tokenAddress && !params.operatorAddress) {
         throw new Error('Either tokenAddress or operatorAddress should be non-null');
     }
+    if (params.generateId && !params.amount) {
+        throw new Error('Invoices with id should contain amount property');
+    }
     var invoice = {
         network: params.network,
         publicKey: params.publicKey,
         tokenAddress: params.tokenAddress || params.operatorAddress,
     };
-    if (params.generateId) {
-        invoice.id = v4_1.default()
-            .split('-')
-            .join('');
-    }
     if (params.operatorAddress)
         invoice.operatorAddress = params.operatorAddress;
     if (params.amount)
         invoice.amount = new bignumber_js_1.default(params.amount);
-    if (params.deriveNonce)
+    if (params.generateId) {
+        invoice.id = v4_1.default()
+            .split('-')
+            .join('');
         invoice.nonce = exports.deriveNonce(invoice);
+    }
     return invoice;
 };
 exports.encodeInvoice = function (invoice) {
@@ -42,11 +44,11 @@ exports.encodeInvoice = function (invoice) {
     if (invoice.operatorAddress)
         data.push(invoice.operatorAddress);
     if (invoice.amount)
-        data.push(invoice.amount.toString());
-    return data.join('|');
+        data.push(compressAmount(invoice.amount.toString()));
+    return INVOICE_PREFIX + data.join('|');
 };
 exports.decodeInvoice = function (encoded) {
-    var data = encoded.split('|');
+    var data = encoded.substring(INVOICE_PREFIX.length).split('|');
     var invoice = {
         network: Number.parseInt(data.shift()),
         publicKey: data.shift(),
@@ -63,8 +65,9 @@ exports.decodeInvoice = function (encoded) {
     nextPiece = data.shift();
     if (nextPiece.substr(0, 2) === '0x') {
         invoice.operatorAddress = nextPiece;
-        if (data.length > 0)
-            invoice.amount = new bignumber_js_1.default(data.shift());
+        if (data.length > 0) {
+            invoice.amount = new bignumber_js_1.default(decompressAmount(data.shift()));
+        }
     }
     else {
         invoice.amount = new bignumber_js_1.default(nextPiece);
@@ -73,4 +76,21 @@ exports.decodeInvoice = function (encoded) {
         invoice.nonce = exports.deriveNonce(invoice);
     return invoice;
 };
+var compressAmount = function (amount) {
+    for (var i = amount.length - 1; i >= 0; i--) {
+        if (amount[i] !== '0') {
+            var zerosAmount = amount.length - i - 1;
+            return zerosAmount > 2 ? amount.substring(0, i + 1) + '^' + zerosAmount.toString() : amount;
+        }
+    }
+    return amount;
+};
+var decompressAmount = function (amount) {
+    var caretPosition = amount.indexOf('^');
+    return caretPosition === -1
+        ? amount
+        : amount.substring(0, caretPosition) +
+            '0'.repeat(Number.parseInt(amount.substring(caretPosition + 1)));
+};
+var INVOICE_PREFIX = 'LQI';
 //# sourceMappingURL=index.js.map

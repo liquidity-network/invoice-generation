@@ -6,91 +6,71 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var web3_utils_1 = require("web3-utils");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var v4_1 = __importDefault(require("uuid/v4"));
-var destinationChecksum = function (invoiceDestination) {
-    var walletAddressesChecksums = invoiceDestination.walletAddresses.map(function (walletAddress) {
-        return {
-            type: 'bytes32',
-            value: web3_utils_1.soliditySha3({
-                type: 'address',
-                value: walletAddress,
-            }),
-        };
-    });
-    return web3_utils_1.soliditySha3.apply(void 0, [{
-            type: 'uint256',
-            value: invoiceDestination.networkId.toString(),
-        },
-        {
-            type: 'bytes32',
-            value: web3_utils_1.soliditySha3({
-                type: 'address',
-                value: invoiceDestination.contractAddress,
-            }),
-        }].concat(walletAddressesChecksums));
-};
-exports.deriveReferenceNonce = function (invoice) {
-    var destinationsChecksumTargets = invoice.destinations
-        .map(destinationChecksum)
-        .map(function (checksum) { return ({ type: 'bytes32', value: checksum }); });
-    var destinationsChecksum = web3_utils_1.soliditySha3.apply(void 0, destinationsChecksumTargets);
-    var invoiceChecksum = web3_utils_1.soliditySha3({ type: 'bytes16', value: invoice.uuid }, { type: 'bytes32', value: destinationsChecksum }, { type: 'uint256', value: invoice.amount.toFixed(0) }, { type: 'bytes32', value: invoice.tokenAddress }, { type: 'bytes32', value: invoice.details });
+exports.deriveNonce = function (invoice) {
+    var invoiceChecksum = web3_utils_1.soliditySha3({ type: 'bytes16', value: invoice.id }, { type: 'uint256', value: invoice.network.toString() }, { type: 'bytes32', value: invoice.operatorAddress }, { type: 'bytes32', value: invoice.publicKey }, { type: 'uint256', value: invoice.amount.toFixed(0) }, { type: 'bytes32', value: invoice.tokenAddress });
     var completeNonce = new bignumber_js_1.default(invoiceChecksum);
     var fragment = new bignumber_js_1.default(2).pow(32);
     return completeNonce.mod(fragment).toNumber();
 };
-exports.createInvoice = function (receiver, amount, details, tokenAddress) {
-    if (details === void 0) { details = ''; }
-    if (typeof tokenAddress === 'undefined') {
-        tokenAddress = receiver.hubAddress;
+exports.createInvoice = function (params) {
+    if (!params.tokenAddress && !params.operatorAddress) {
+        throw new Error('Either tokenAddress or operatorAddress should be non-null');
     }
     var invoice = {
-        uuid: v4_1.default()
-            .split('-')
-            .join(''),
-        destinations: [
-            {
-                networkId: receiver.networkId,
-                contractAddress: web3_utils_1.toChecksumAddress(receiver.hubAddress),
-                walletAddresses: [web3_utils_1.toChecksumAddress(receiver.publicKey)],
-            },
-        ],
-        amount: new bignumber_js_1.default(amount),
-        tokenAddress: tokenAddress,
-        details: web3_utils_1.soliditySha3(details),
+        network: params.network,
+        publicKey: params.publicKey,
+        tokenAddress: params.tokenAddress || params.operatorAddress,
     };
-    invoice.nonce = exports.deriveReferenceNonce(invoice);
+    if (params.generateId) {
+        invoice.id = v4_1.default()
+            .split('-')
+            .join('');
+    }
+    if (params.operatorAddress)
+        invoice.operatorAddress = params.operatorAddress;
+    if (params.amount)
+        invoice.amount = new bignumber_js_1.default(params.amount);
+    if (params.deriveNonce)
+        invoice.nonce = exports.deriveNonce(invoice);
     return invoice;
 };
 exports.encodeInvoice = function (invoice) {
-    return [
-        invoice.uuid,
-        invoice.destinations
-            .map(function (dest) {
-            return [dest.networkId, dest.contractAddress, dest.walletAddresses.join('#')].join('@');
-        })
-            .join('&'),
-        invoice.amount.toString(),
-        invoice.tokenAddress,
-        invoice.details,
-    ].join('|');
+    var data = [invoice.network, invoice.publicKey];
+    if (invoice.id)
+        data.push(invoice.id);
+    data.push(invoice.tokenAddress);
+    if (invoice.operatorAddress)
+        data.push(invoice.operatorAddress);
+    if (invoice.amount)
+        data.push(invoice.amount.toString());
+    return data.join('|');
 };
 exports.decodeInvoice = function (encoded) {
     var data = encoded.split('|');
     var invoice = {
-        uuid: data[0],
-        destinations: data[1].split('&').map(function (dest) {
-            var destData = dest.split('@');
-            return {
-                networkId: Number.parseInt(destData[0]),
-                contractAddress: web3_utils_1.toChecksumAddress(destData[1]),
-                walletAddresses: destData[2].split('#').map(function (a) { return web3_utils_1.toChecksumAddress(a); }),
-            };
-        }),
-        amount: new bignumber_js_1.default(data[2]),
-        tokenAddress: data[3],
-        details: data[4],
+        network: Number.parseInt(data.shift()),
+        publicKey: data.shift(),
+        tokenAddress: undefined,
     };
-    invoice.nonce = exports.deriveReferenceNonce(invoice);
+    var nextPiece = data.shift();
+    if (nextPiece.substr(0, 2) !== '0x') {
+        invoice.id = nextPiece;
+        nextPiece = data.shift();
+    }
+    invoice.tokenAddress = nextPiece;
+    if (data.length === 0)
+        return invoice;
+    nextPiece = data.shift();
+    if (nextPiece.substr(0, 2) === '0x') {
+        invoice.operatorAddress = nextPiece;
+        if (data.length > 0)
+            invoice.amount = new bignumber_js_1.default(data.shift());
+    }
+    else {
+        invoice.amount = new bignumber_js_1.default(nextPiece);
+    }
+    if (invoice.id)
+        invoice.nonce = exports.deriveNonce(invoice);
     return invoice;
 };
 //# sourceMappingURL=index.js.map

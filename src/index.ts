@@ -38,7 +38,6 @@ export const createInvoice = (params: {
   operatorAddress?: string
   tokenAddress?: string
   amount?: number | string | BigNumber
-  deriveNonce?: boolean
 }): Invoice => {
   if (!params.tokenAddress && !params.operatorAddress) {
     throw new Error('Either tokenAddress or operatorAddress should be non-null')

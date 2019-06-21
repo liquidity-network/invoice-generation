@@ -1,28 +1,6 @@
 {
-  "extends": ["standard", "prettier"],
-  "plugins": ["@typescript-eslint", "prettier"],
-  "parser": "@typescript-eslint/parser",
+  "extends": ["liquidity"],
   "env": {
-    "browser": true,
-    "serviceworker": true
-  },
-  "rules": {
-    "comma-dangle": 0,
-    "react/prop-types": 0,
-    "no-unused-vars": 0,
-    "@typescript-eslint/no-unused-vars": "warn",
-    "no-use-before-define": 0,
-    "prettier/prettier": [
-      "error",
-      {
-        "printWidth": 95,
-        "singleQuote": true,
-        "trailingComma": "all",
-        "semi": false
-      }
-    ]
-  },
-  "globals": {
-    "__DEV__": true
+    "jest": true
   }
 }

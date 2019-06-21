@@ -80,11 +80,11 @@ export const encodeInvoice = (invoice: Invoice): string => {
 
   if (invoice.amount) data.push(compressAmount(invoice.amount.toString()))
 
-  return data.join('|')
+  return INVOICE_PREFIX + data.join('|')
 }
 
 export const decodeInvoice = (encoded: string): Invoice => {
-  const data = encoded.split('|')
+  const data = encoded.substring(INVOICE_PREFIX.length).split('|')
 
   const invoice: Invoice = {
     network: Number.parseInt(data.shift()),
@@ -139,3 +139,5 @@ const decompressAmount = (amount: string): string => {
     : amount.substring(0, caretPosition) +
         '0'.repeat(Number.parseInt(amount.substring(caretPosition + 1)))
 }
+
+const INVOICE_PREFIX = 'LQI'

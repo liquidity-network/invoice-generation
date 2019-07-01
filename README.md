@@ -21,4 +21,17 @@ const invoice: Invoice = createInvoice({
 const encodedInvoice: string = encodeInvoice(invoice) // Used to generate QR code
 
 const decodedInvoice: Invoice = decodeInvoice(encodedInvoice) // Decode invoice after QR code scanning
+
+// Note: Here, decodedInvoice equals invoice
 ```
+
+- Feed `encodedInvoice` into a QR code generator as plain text. (i.g: user https://www.the-qrcode-generator.com or a library) to be scanned by the user.
+- Feed `decodedInvoice` into the `sendTransfer` funciton of the NOCUSManager. 
+- If no amount is specified invoice.amount will be undefined, it needs to be set beofre making a transfer wiht the nocust manager client side.
+- If tokenAddress is not specified, Ether will be used. 
+
+The typical merchant needs to track the completion of payments by its customer, to do so we use `generateId`.
+
+1. SERVER SIDE, generate an invoice with `generateId` set to `true` and save the nonce in the invoice object `invoice.nonce` in the merchant server db. It is important to be done server side otherwise the client can manipulate the value. 
+2. Encode the invoice with `encodeInvoice` function and send it to the client front-end to display the QR code
+3. Wait for an incoming payment with the nocust-manager that has the correct nonce value AND amount.

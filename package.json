@@ -1,6 +1,6 @@
 {
   "name": "liquidity-invoice-generation",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0",
   "description": "Invoice generation system compatible with Liquidity Network",
   "main": "dist/index.js",
   "scripts": {

@@ -26,8 +26,8 @@ const decodedInvoice: Invoice = decodeInvoice(encodedInvoice) // Decode invoice 
 ```
 
 - Feed `encodedInvoice` into a QR code generator as plain text. (i.g: user https://www.the-qrcode-generator.com or a library) to be scanned by the user.
-- Feed `decodedInvoice` into the `sendTransfer` funciton of the NOCUSManager. 
-- If no amount is specified invoice.amount will be undefined, it needs to be set beofre making a transfer wiht the nocust manager client side.
+- Feed `decodedInvoice` into the `sendTransfer` function of the NOCUSManager. 
+- If no amount is specified invoice.amount will be undefined, it needs to be set before making a transfer with the nocust manager client side.
 - If tokenAddress is not specified, Ether will be used. 
 
 The typical merchant needs to track the completion of payments by its customer, to do so we use `generateId`.

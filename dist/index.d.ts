@@ -1,22 +1,21 @@
-import BigNumber from 'bignumber.js';
-export interface Destination {
-    networkId: number;
-    contractAddress: string;
-    walletAddresses: string[];
-}
+import BigNumber from 'bignumber.js'
 export interface Invoice {
-    uuid: string;
-    destinations: Destination[];
-    amount: BigNumber;
-    tokenAddress: string;
-    details: string;
-    nonce?: number;
+  network: number
+  publicKey: string
+  tokenAddress: string
+  id?: string
+  operatorAddress?: string
+  amount?: BigNumber
+  nonce?: number
 }
-export declare const deriveReferenceNonce: (invoice: Invoice) => number;
-export declare const createInvoice: (receiver: {
-    networkId: number;
-    hubAddress: string;
-    publicKey: string;
-}, amount: string | number | BigNumber, details?: string, tokenAddress?: string) => Invoice;
-export declare const encodeInvoice: (invoice: Invoice) => string;
-export declare const decodeInvoice: (encoded: string) => Invoice;
+export declare const deriveNonce: (invoice: Invoice) => number
+export declare const createInvoice: (params: {
+  network: number
+  publicKey: string
+  generateId?: boolean
+  operatorAddress?: string
+  tokenAddress?: string
+  amount?: string | number | BigNumber
+}) => Invoice
+export declare const encodeInvoice: (invoice: Invoice) => string
+export declare const decodeInvoice: (encoded: string) => Invoice

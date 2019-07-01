@@ -70,7 +70,7 @@ exports.decodeInvoice = function (encoded) {
         }
     }
     else {
-        invoice.amount = new bignumber_js_1.default(nextPiece);
+        invoice.amount = new bignumber_js_1.default(decompressAmount(nextPiece));
     }
     if (invoice.id)
         invoice.nonce = exports.deriveNonce(invoice);

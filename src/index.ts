@@ -112,7 +112,7 @@ export const decodeInvoice = (encoded: string): Invoice => {
       invoice.amount = new BigNumber(decompressAmount(data.shift()))
     }
   } else {
-    invoice.amount = new BigNumber(nextPiece)
+    invoice.amount = new BigNumber(decompressAmount(nextPiece))
   }
 
   if (invoice.id) invoice.nonce = deriveNonce(invoice)

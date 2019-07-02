@@ -7,14 +7,14 @@ var web3_utils_1 = require("web3-utils");
 var bignumber_js_1 = __importDefault(require("bignumber.js"));
 var v4_1 = __importDefault(require("uuid/v4"));
 exports.deriveNonce = function (invoice) {
-    var invoiceChecksum = web3_utils_1.soliditySha3({ type: 'bytes16', value: invoice.id }, { type: 'uint256', value: invoice.network.toString() }, { type: 'bytes32', value: invoice.operatorAddress }, { type: 'bytes32', value: invoice.publicKey }, { type: 'uint256', value: invoice.amount.toFixed(0) }, { type: 'bytes32', value: invoice.tokenAddress });
+    var invoiceChecksum = web3_utils_1.soliditySha3({ type: 'bytes16', value: invoice.id }, { type: 'uint256', value: invoice.network.toString() }, { type: 'bytes32', value: invoice.contractAddress }, { type: 'bytes32', value: invoice.publicKey }, { type: 'uint256', value: invoice.amount.toFixed(0) }, { type: 'bytes32', value: invoice.tokenAddress });
     var completeNonce = new bignumber_js_1.default(invoiceChecksum);
     var fragment = new bignumber_js_1.default(2).pow(32);
     return completeNonce.mod(fragment).toNumber();
 };
 exports.createInvoice = function (params) {
-    if (!params.tokenAddress && !params.operatorAddress) {
-        throw new Error('Either tokenAddress or operatorAddress should be non-null');
+    if (!params.tokenAddress && !params.contractAddress) {
+        throw new Error('Either tokenAddress or contractAddress should be non-null');
     }
     if (params.generateId && !params.amount) {
         throw new Error('Invoices with id should contain amount property');
@@ -22,10 +22,10 @@ exports.createInvoice = function (params) {
     var invoice = {
         network: params.network,
         publicKey: params.publicKey,
-        tokenAddress: params.tokenAddress || params.operatorAddress,
+        tokenAddress: params.tokenAddress || params.contractAddress,
     };
-    if (params.operatorAddress)
-        invoice.operatorAddress = params.operatorAddress;
+    if (params.contractAddress)
+        invoice.contractAddress = params.contractAddress;
     if (params.amount)
         invoice.amount = new bignumber_js_1.default(params.amount);
     if (params.generateId) {
@@ -41,8 +41,8 @@ exports.encodeInvoice = function (invoice) {
     if (invoice.id)
         data.push(invoice.id);
     data.push(invoice.tokenAddress);
-    if (invoice.operatorAddress)
-        data.push(invoice.operatorAddress);
+    if (invoice.contractAddress)
+        data.push(invoice.contractAddress);
     if (invoice.amount)
         data.push(compressAmount(invoice.amount.toString()));
     return INVOICE_PREFIX + data.join('|');
@@ -64,7 +64,7 @@ exports.decodeInvoice = function (encoded) {
         return invoice;
     nextPiece = data.shift();
     if (nextPiece.substr(0, 2) === '0x') {
-        invoice.operatorAddress = nextPiece;
+        invoice.contractAddress = nextPiece;
         if (data.length > 0) {
             invoice.amount = new bignumber_js_1.default(decompressAmount(data.shift()));
         }

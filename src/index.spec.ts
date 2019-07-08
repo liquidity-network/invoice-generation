@@ -9,14 +9,14 @@ describe('Invoice generation unit tests', () => {
     testInvoice(
       {
         network: 1,
-        operatorAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
+        contractAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
         publicKey: '0xE6987CD613Dfda0995A95b3E6acBAbECecd41376',
       },
       {
         network: 1,
         publicKey: '0xE6987CD613Dfda0995A95b3E6acBAbECecd41376',
         tokenAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
-        operatorAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
+        contractAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
       },
     )
   })
@@ -25,7 +25,7 @@ describe('Invoice generation unit tests', () => {
     testInvoice(
       {
         network: 1,
-        operatorAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
+        contractAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
         publicKey: '0xE6987CD613Dfda0995A95b3E6acBAbECecd41376',
         amount: '1000000000',
       },
@@ -33,7 +33,7 @@ describe('Invoice generation unit tests', () => {
         network: 1,
         publicKey: '0xE6987CD613Dfda0995A95b3E6acBAbECecd41376',
         tokenAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
-        operatorAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
+        contractAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
         amount: new BigNumber('1000000000'),
       },
     )
@@ -44,14 +44,14 @@ describe('Invoice generation unit tests', () => {
       {
         network: 1,
         tokenAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
-        operatorAddress: '0x76D7a535B51f658Ef6fb46b24CF2B0c27f3501eE',
+        contractAddress: '0x76D7a535B51f658Ef6fb46b24CF2B0c27f3501eE',
         publicKey: '0xE6987CD613Dfda0995A95b3E6acBAbECecd41376',
       },
       {
         network: 1,
         publicKey: '0xE6987CD613Dfda0995A95b3E6acBAbECecd41376',
         tokenAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
-        operatorAddress: '0x76D7a535B51f658Ef6fb46b24CF2B0c27f3501eE',
+        contractAddress: '0x76D7a535B51f658Ef6fb46b24CF2B0c27f3501eE',
       },
     )
   })
@@ -61,7 +61,7 @@ describe('Invoice generation unit tests', () => {
       {
         network: 1,
         tokenAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
-        operatorAddress: '0x76D7a535B51f658Ef6fb46b24CF2B0c27f3501eE',
+        contractAddress: '0x76D7a535B51f658Ef6fb46b24CF2B0c27f3501eE',
         publicKey: '0xE6987CD613Dfda0995A95b3E6acBAbECecd41376',
         generateId: true,
         amount: '1000000000',
@@ -70,7 +70,7 @@ describe('Invoice generation unit tests', () => {
         network: 1,
         publicKey: '0xE6987CD613Dfda0995A95b3E6acBAbECecd41376',
         tokenAddress: '0x4FED1fC4144c223aE3C1553be203cDFcbD38C581',
-        operatorAddress: '0x76D7a535B51f658Ef6fb46b24CF2B0c27f3501eE',
+        contractAddress: '0x76D7a535B51f658Ef6fb46b24CF2B0c27f3501eE',
         amount: new BigNumber('1000000000'),
         id: '10000000000000000000000000000001',
         nonce: 1158935742,

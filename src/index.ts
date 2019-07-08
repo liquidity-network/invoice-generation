@@ -9,8 +9,8 @@ export interface Invoice {
   // If invoice has id, there should be single transaction paying it,
   // that will be tracked by invoice issuer by nonce.
   id?: string
-  // If there is no operatorAddress, invoice is for on-chain payment
-  operatorAddress?: string
+  // If there is no contractAddress, invoice is for on-chain payment
+  contractAddress?: string
   amount?: BigNumber
   nonce?: number
 }
@@ -19,7 +19,7 @@ export const deriveNonce = (invoice: Invoice): number => {
   const invoiceChecksum = soliditySha3(
     { type: 'bytes16', value: invoice.id },
     { type: 'uint256', value: invoice.network.toString() },
-    { type: 'bytes32', value: invoice.operatorAddress },
+    { type: 'bytes32', value: invoice.contractAddress },
     { type: 'bytes32', value: invoice.publicKey },
     { type: 'uint256', value: invoice.amount.toFixed(0) },
     { type: 'bytes32', value: invoice.tokenAddress },
@@ -35,12 +35,12 @@ export const createInvoice = (params: {
   network: number
   publicKey: string
   generateId?: boolean
-  operatorAddress?: string
+  contractAddress?: string
   tokenAddress?: string
   amount?: number | string | BigNumber
 }): Invoice => {
-  if (!params.tokenAddress && !params.operatorAddress) {
-    throw new Error('Either tokenAddress or operatorAddress should be non-null')
+  if (!params.tokenAddress && !params.contractAddress) {
+    throw new Error('Either tokenAddress or contractAddress should be non-null')
   }
 
   if (params.generateId && !params.amount) {
@@ -50,10 +50,10 @@ export const createInvoice = (params: {
   const invoice: Invoice = {
     network: params.network,
     publicKey: params.publicKey,
-    tokenAddress: params.tokenAddress || params.operatorAddress,
+    tokenAddress: params.tokenAddress || params.contractAddress,
   }
 
-  if (params.operatorAddress) invoice.operatorAddress = params.operatorAddress
+  if (params.contractAddress) invoice.contractAddress = params.contractAddress
 
   if (params.amount) invoice.amount = new BigNumber(params.amount)
 
@@ -75,7 +75,7 @@ export const encodeInvoice = (invoice: Invoice): string => {
 
   data.push(invoice.tokenAddress)
 
-  if (invoice.operatorAddress) data.push(invoice.operatorAddress)
+  if (invoice.contractAddress) data.push(invoice.contractAddress)
 
   if (invoice.amount) data.push(compressAmount(invoice.amount.toString()))
 
@@ -106,7 +106,7 @@ export const decodeInvoice = (encoded: string): Invoice => {
   nextPiece = data.shift()
 
   if (nextPiece.substr(0, 2) === '0x') {
-    invoice.operatorAddress = nextPiece
+    invoice.contractAddress = nextPiece
 
     if (data.length > 0) {
       invoice.amount = new BigNumber(decompressAmount(data.shift()))

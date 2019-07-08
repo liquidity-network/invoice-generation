@@ -4,7 +4,7 @@ export interface Invoice {
   publicKey: string
   tokenAddress: string
   id?: string
-  operatorAddress?: string
+  contractAddress?: string
   amount?: BigNumber
   nonce?: number
 }
@@ -13,7 +13,7 @@ export declare const createInvoice: (params: {
   network: number
   publicKey: string
   generateId?: boolean
-  operatorAddress?: string
+  contractAddress?: string
   tokenAddress?: string
   amount?: string | number | BigNumber
 }) => Invoice
